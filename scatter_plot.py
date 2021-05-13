@@ -24,9 +24,9 @@ def save_scatter_plot(M_data, B_data, i, j):
     j_feature = "feature " + str(j + 1)
     plt.xlabel(i_feature)
     plt.ylabel(j_feature)
-    plt.title('%s , %s' % (i_feature, j_feature))
+    plt.title('scatter plot between %s and %s' % (i_feature, j_feature))
     plt.legend(loc='upper right')
-    target = "Scatter_plot/" + '%s , %s' % (i_feature, j_feature) + "png"
+    target = "Scatter_plot/" + '%d-%d' % ((i+1), (j+1)) + ".png"
     plt.savefig(target)
     print(target)
 
