@@ -1,7 +1,6 @@
 import numpy as np
 
-
-class Dense(Layer):
+class Dense():
     def __init__(self, input_units, output_units, learning_rate=0.1):
         """
         A dense layer is a layer which performs a learned affine transformation:
