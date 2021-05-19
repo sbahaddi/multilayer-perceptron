@@ -28,9 +28,8 @@ def save_pairPlots(M_data, B_data):
             print('creating pair plot feature %02d vs feature %02d ' %
                   (i + 1, j + 1))
     fig.tight_layout()
-    print("Pair Plot saved..")
     plt.savefig("pair_plots/pair_plot.png")
-
+    print("Pair Plot saved..")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

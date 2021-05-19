@@ -1,7 +1,6 @@
 import numpy as np
 
-
-class ReLU(Activation):
+class ReLU():
     def __init__(self):
         pass
 
@@ -18,7 +17,7 @@ class ReLU(Activation):
         return grad_output * relu_grad
 
 
-class Softmax(Activation):
+class Softmax():
     def __init__(self):
         pass
 
