@@ -38,16 +38,16 @@ class Data:
         for i, val in enumerate(encode):
             self.raw_y[self.raw_y == val] = i
 
-    # def split_data(self, data, val_split, label_index=-1):
-    #     np.random.shuffle(data)
-    #     categories = [data[data[:, label_index] == l] for l in config.labels]
+    def split_data(self, data, val_split, label_index=-1):
+        np.random.shuffle(data)
+        categories = [data[data[:, label_index] == l] for l in config.labels]
 
-    #     ratios = [int(len(cat) * val_split // 100) for cat in categories]
+        ratios = [int(len(cat) * val_split // 100) for cat in categories]
 
-    #     train = np.concatenate([cat[: -ratios[i]] for i, cat in enumerate(categories)])
-    #     np.random.shuffle(train)
+        train = np.concatenate([cat[: -ratios[i]] for i, cat in enumerate(categories)])
+        np.random.shuffle(train)
 
-    #     val = np.concatenate([cat[-ratios[i] :] for i, cat in enumerate(categories)])
-    #     np.random.shuffle(val)
+        val = np.concatenate([cat[-ratios[i] :] for i, cat in enumerate(categories)])
+        np.random.shuffle(val)
 
-    #     return train, val
+        return train, val
