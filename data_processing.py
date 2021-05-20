@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
-import sys
+import config as cfg
+np.random.seed(1337)
 
 
 class Data:
@@ -9,9 +10,9 @@ class Data:
         self.raw_x = self.raw_data[:, 1:].astype(float)
         self.raw_y = self.raw_data[:, 0].copy()
         self.X_train = None
-        self.X_test = None
+        self.X_val = None
         self.y_train = None
-        self.y_test = None
+        self.y_val = None
 
     def read_data(self, file):
         try:
@@ -23,31 +24,40 @@ class Data:
         return data
 
     def init_data(self):
-        self.one_hot_encoding()
-        self.raw_data = np.concatenate((self.raw_x, self.raw_y), axis=1)
+        train, val = self.split_data()
+        self.X_train,self.y_train = train[:,1:].astype(float), self.one_hot_encoding(train[:,0])
+        self.X_val,self.y_val = val[:,1:].astype(float), self.one_hot_encoding(val[:,0])
+        # self.raw_data = np.concatenate((self.raw_x, self.raw_y), axis=1)
 
-    def one_hot_encoding(self):
-        self.cat_to_num()
-        ret = np.zeros((len(self.raw_y), 2))
-        for i, val in enumerate(self.raw_y.flat):
-            ret[i, val] = 1
-        self.raw_y = ret
+    def scale_data(self, X):
+        if type(self.xmax):
+            self.xmax = X.max(axis=0)
+            print(self.xmax)
+            self.xmin = X.min(axis=0)
+        if len(self.xmax) != X.shape[1]:
+            print("Data shape does not have the shape pretrained for this model.")
+            exit()
+        return (X - self.xmin)/self.xmax
 
-    def cat_to_num(self):
-        encode = ["M", "B"]
-        for i, val in enumerate(encode):
-            self.raw_y[self.raw_y == val] = i
+    def one_hot_encoding(self, y):
+        categories = cfg.categories
+        for i, val in enumerate(categories):
+            y[y == val] = i
+        encode = np.zeros((len(y), 2))
+        for i, val in enumerate(y.flat):
+            encode[i, val] = 1
+        return encode
 
-    def split_data(self, data, val_split, label_index=-1):
-        np.random.shuffle(data)
-        categories = [data[data[:, label_index] == l] for l in config.labels]
+    def split_data(self):
+        np.random.shuffle(self.raw_data)
+        categories = [self.raw_data[self.raw_data[:, 0] == l] for l in cfg.categories]
 
-        ratios = [int(len(cat) * val_split // 100) for cat in categories]
+        ratios = [int(len(cat) * cfg.split_val // 100) for cat in categories]
 
-        train = np.concatenate([cat[: -ratios[i]] for i, cat in enumerate(categories)])
+        train = np.concatenate([cat[: ratios[i]] for i, cat in enumerate(categories)])
         np.random.shuffle(train)
 
-        val = np.concatenate([cat[-ratios[i] :] for i, cat in enumerate(categories)])
+        val = np.concatenate([cat[ratios[i] :] for i, cat in enumerate(categories)])
         np.random.shuffle(val)
 
         return train, val
