@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import config as cfg
-np.random.seed(1337)
+# np.random.seed(1337)
 
 
 class Data:
@@ -13,6 +13,8 @@ class Data:
         self.X_val = None
         self.y_train = None
         self.y_val = None
+        self.x_max = None
+        self.x_min = None
 
     def read_data(self, file):
         try:
@@ -27,17 +29,14 @@ class Data:
         train, val = self.split_data()
         self.X_train,self.y_train = train[:,1:].astype(float), self.one_hot_encoding(train[:,0])
         self.X_val,self.y_val = val[:,1:].astype(float), self.one_hot_encoding(val[:,0])
-        # self.raw_data = np.concatenate((self.raw_x, self.raw_y), axis=1)
+        self.X_train = self.scale_data(self.X_train)
+        self.X_val = self.scale_data(self.X_val)
 
     def scale_data(self, X):
-        if type(self.xmax):
-            self.xmax = X.max(axis=0)
-            print(self.xmax)
-            self.xmin = X.min(axis=0)
-        if len(self.xmax) != X.shape[1]:
-            print("Data shape does not have the shape pretrained for this model.")
-            exit()
-        return (X - self.xmin)/self.xmax
+        if(self.x_max is  None and self.x_min is None):
+            self.x_max = X.max(axis=0)
+            self.x_min = X.min(axis=0)
+        return (X - self.x_min) / (self.x_max - self.x_min)
 
     def one_hot_encoding(self, y):
         categories = cfg.categories
