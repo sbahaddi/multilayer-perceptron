@@ -8,14 +8,15 @@ class Model:
     def __init__(self, layers, data):
         self.network = self.__create_network(layers)
         self.data = data
-        self.cost_log = None
+        self.train_cost_log = None
+        self.val_cost_log = None
         self.train_log = None
         self.val_log = None
         self.lr_log = None
 
     @staticmethod
     def __create_network(layers):
-        network=[]
+        network = []
         n_layers = len(layers) - 1
         for i in range(n_layers):
             network.append(Dense(*layers[i:i+2]))
@@ -36,25 +37,41 @@ class Model:
 
         train_log = []
         val_log = []
-        cost_log = []
+        train_cost_log = []
+        val_cost_log = []
         lr_log = []
 
         for ep in range(epochs):
-            cost = []
+            train_cost = []
+            val_cost = []
             for X_batch, y_batch in self.get_minibatches(self.data.X_train, self.data.y_train, batch_size):
-                cost.append(self.train_batch(X_batch, y_batch, lr))
-            
-            train_log.append(self.score(self.predict(self.data.X_train), self.data.y_train))
-            val_log.append(self.score(self.predict(self.data.X_val), self.data.y_val))
-            cost_log.append(np.mean(cost))
+                train_cost.append(self.train_batch(X_batch, y_batch, lr))
+                val_cost.append(self.compute_loss(
+                    self.data.X_val, self.data.y_val))
+
+            train_log.append(self.score(self.predict(
+                self.data.X_train), self.data.y_train))
+            val_log.append(self.score(self.predict(
+                self.data.X_val), self.data.y_val))
+            train_cost_log.append(np.mean(train_cost))
+            val_cost_log.append(np.mean(val_cost))
             lr_log.append(lr)
-        
-        self.cost_log = cost_log
+
+            print(
+                f"epoch {ep}/{epochs} - loss: {train_cost_log[-1]} - val_loss: {val_cost_log[-1]}")
+
+        self.train_cost_log = train_cost_log
+        self.val_cost_log = val_cost_log
         self.train_log = train_log
         self.val_log = val_log
         self.lr_log = lr_log
 
-        return cost_log, train_log, val_log, lr_log
+        return train_cost_log, val_cost_log, train_log, val_log, lr_log
+
+    def compute_loss(self, X, y):
+        val_preds = self.forward(X)[-1]
+        val_loss = self.softmax_crossentropy_logits(val_preds[:, 1], y[:, 1])
+        return val_loss
 
     @staticmethod
     def get_minibatches(X, y, batch_size):
@@ -68,10 +85,10 @@ class Model:
         inputs = [X] + activations
         logits = activations[-1]
 
-        loss = self.softmax_crossentropy_logits(logits[:,1], y[:,1])
+        loss = self.softmax_crossentropy_logits(logits[:, 1], y[:, 1])
 
         loss_grad = self.network[-1].grad(logits, y)
-        
+
         for i in range(len(self.network) - 1)[::-1]:
             layer = self.network[i]
             loss_grad = layer.backward(inputs[i], loss_grad, lr)
