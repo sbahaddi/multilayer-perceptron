@@ -1,5 +1,6 @@
 import numpy as np
 import config as cfg
+import pickle as pk
 import argparse
 from data_processing import Data
 from mlp import Model

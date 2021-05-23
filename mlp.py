@@ -126,6 +126,5 @@ class Model:
         logits = self.forward(X)[-1]
         return logits.argmax(axis=-1)
 
-# len = 9
-# batch = 2
-# 1 2 3 4 5 6 7 8 9
+    def save_to_file(self, name="mlp.model", directory="networks", n=0):
+        pass
