@@ -1,8 +1,8 @@
 split_val = 80
 dataset_path = "datasets/data.csv"
-categories = ["M","B"]
-batch_size = 1
-epochs=100
+categories = ["M", "B"]
+batch_size = 20
+epochs = 100
 learning_rate = 0.01
 dynamic_learning_rate = True
 learning_rate_multiplier = 0.666

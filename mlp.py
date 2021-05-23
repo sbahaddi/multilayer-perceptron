@@ -53,8 +53,10 @@ class Model:
                 self.data.X_train), self.data.y_train))
             val_log.append(self.score(self.predict(
                 self.data.X_val), self.data.y_val))
+
             train_cost_log.append(np.mean(train_cost))
             val_cost_log.append(np.mean(val_cost))
+
             lr_log.append(lr)
 
             print(
