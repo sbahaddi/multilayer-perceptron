@@ -77,6 +77,7 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log):
     plt.subplot(212)
     plt.title("Loss")
     plt.ylabel("cross-entropy")
+    plt.xlabel("epochs")
     plt.plot(range(len(train_cost_log)), train_cost_log, label='Train')
     plt.plot(range(len(val_cost_log)), val_cost_log, label='Validation')
     plt.legend()
@@ -104,7 +105,8 @@ if __name__ == "__main__":
 
     data = Data(cfg.dataset_path)
     data.init_data()
-    model = Model((data.X_train.shape[1], 5, 5, 2), data)
+    network = (data.X_train.shape[1],) + cfg.layers
+    model = Model(network, data)
     train_cost_log, val_cost_log, train_log, val_log, lr_log = model.train()
     if args.cm:
         confusion_matrix(model.predict(data.X_val), data.y_val,
