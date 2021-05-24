@@ -1,13 +1,16 @@
 import numpy as np
 import config as cfg
+import pickle as pk
 from dense import Dense
 from activation import ReLU, Softmax
+from os import path, mkdir
 
 
 class Model:
-    def __init__(self, layers, data):
+    def __init__(self, layers):
         self.network = self.__create_network(layers)
-        self.data = data
+        self.x_max = None
+        self.x_min = None
         self.train_cost_log = None
         self.val_cost_log = None
         self.train_log = None
@@ -26,7 +29,7 @@ class Model:
                 network.append(Softmax())
         return network
 
-    def train(self):
+    def train(self, X_train, y_train, X_val, y_val):
         batch_size = cfg.batch_size
         epochs = cfg.epochs
         lr = cfg.learning_rate
@@ -44,15 +47,12 @@ class Model:
         for ep in range(epochs):
             train_cost = []
             val_cost = []
-            for X_batch, y_batch in self.get_minibatches(self.data.X_train, self.data.y_train, batch_size):
+            for X_batch, y_batch in self.get_minibatches(X_train, y_train, batch_size):
                 train_cost.append(self.train_batch(X_batch, y_batch, lr))
-                val_cost.append(self.compute_loss(
-                    self.data.X_val, self.data.y_val))
+                val_cost.append(self.compute_loss(X_val, y_val))
 
-            train_log.append(self.score(self.predict(
-                self.data.X_train), self.data.y_train))
-            val_log.append(self.score(self.predict(
-                self.data.X_val), self.data.y_val))
+            train_log.append(self.score(self.predict(X_train), y_train))
+            val_log.append(self.score(self.predict(X_val), y_val))
 
             train_cost_log.append(np.mean(train_cost))
             val_cost_log.append(np.mean(val_cost))
@@ -126,5 +126,37 @@ class Model:
         logits = self.forward(X)[-1]
         return logits.argmax(axis=-1)
 
-    def save_to_file(self, name="mlp.model", directory="networks", n=0):
-        pass
+    @staticmethod
+    def generate_filename(name, n):
+        if n:
+            extension = name.split('.')[-1]
+            name = ".".join(name.split('.')[:-1])
+            name = name + "(" + str(n) + ")."+extension
+        return name
+
+    def scale_data(self, X):
+        if self.x_max is None and self.x_min is None:
+            self.x_max = X.max(axis=0)
+            self.x_min = X.min(axis=0)
+        return (X - self.x_min) / (self.x_max - self.x_min)
+
+    def save_to_file(self, name="model.mlp", directory="networks", n=0):
+        filename = self.generate_filename(directory + "/" + name, n)
+        if not path.exists(directory) or not path.isdir(directory):
+            mkdir(directory)
+        if path.exists(filename):
+            return self.save_to_file(name, directory, n+1)
+        with open(filename, "wb+") as file:
+            pk.dump(self, file)
+            print(f"Model saved in: {filename}")
+        return filename
+
+    @staticmethod
+    def load(filename):
+        try:
+            with open(filename, 'rb') as file:
+                network = pk.load(file)
+        except Exception:
+            print(f"File {filename} not found or corrupt.")
+            sys.exit()
+        return network

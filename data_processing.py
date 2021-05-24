@@ -2,8 +2,6 @@ import pandas as pd
 import numpy as np
 import config as cfg
 
-# np.random.seed(1337)
-
 
 class Data:
     def __init__(self, file):
@@ -33,14 +31,6 @@ class Data:
             float), self.one_hot_encoding(train[:, 0])
         self.X_val, self.y_val = val[:, 1:].astype(
             float), self.one_hot_encoding(val[:, 0])
-        self.X_train = self.scale_data(self.X_train)
-        self.X_val = self.scale_data(self.X_val)
-
-    def scale_data(self, X):
-        if self.x_max is None and self.x_min is None:
-            self.x_max = X.max(axis=0)
-            self.x_min = X.min(axis=0)
-        return (X - self.x_min) / (self.x_max - self.x_min)
 
     def one_hot_encoding(self, y):
         categories = cfg.categories
