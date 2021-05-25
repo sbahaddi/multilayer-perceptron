@@ -118,6 +118,8 @@ class Model:
             exit()
 
         return -np.sum(c) / len(y)
+        # 1e-15 is used to never do log of 0 which is equal to inf
+        # return np.sum((-y * np.log(1e-15 + pred_logits)) - ((1 - y) * np.log(1e-15 + 1 - pred_logits))) / pred_logits.shape[1]
 
     def score(self, y_pred, y_true):
         return np.mean(y_pred == y_true[:, 1])
@@ -158,5 +160,5 @@ class Model:
                 network = pk.load(file)
         except Exception:
             print(f"File {filename} not found or corrupt.")
-            sys.exit()
+            exit()
         return network
