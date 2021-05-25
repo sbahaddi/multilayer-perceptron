@@ -146,8 +146,8 @@ class Model:
         filename = self.generate_filename(directory + "/" + name, n)
         if not path.exists(directory) or not path.isdir(directory):
             mkdir(directory)
-        if path.exists(filename):
-            return self.save_to_file(name, directory, n+1)
+        # if path.exists(filename):
+        #     return self.save_to_file(name, directory, n+1)
         with open(filename, "wb+") as file:
             pk.dump(self, file)
             print(f"Model saved in: {filename}")

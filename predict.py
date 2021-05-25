@@ -1,6 +1,7 @@
 
 import config as cfg
 import numpy as np
+import argparse
 from mlp import Model
 from data_processing import Data
 
@@ -67,8 +68,13 @@ def one_hot(data, n):
 
 
 if __name__ == "__main__":
-    model = Model.load("networks/mymodel.mlp")
-    data = Data("datasets/data.csv")
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-m", "--model", help="load saved model", default="networks/model.mlp")
+    args = parser.parse_args()
+
+    model = Model.load(args.model)
+    data = Data(cfg.test_data)
     X = model.scale_data(data.raw_x)
     preds = model.predict(X)
     y = data.one_hot_encoding((data.raw_y))

@@ -78,6 +78,6 @@ def splitDataset(path, cut=0.2, label=False, shuffle=False):
 
 
 dataset_url = 'https://projects.intra.42.fr/uploads/document/document/464/data.csv'
-filepath = './data.csv'
+filepath = './evaluation/data.csv'
 os.system('curl -s -o {1} {0}'.format(dataset_url, filepath))
 splitDataset(filepath, cut=0.25, label=False, shuffle=True)

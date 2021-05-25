@@ -2,6 +2,8 @@ Histograms/
 Scatter_plot/
 pair_plots/
 networks/
+evaluation/
+training_plots/
 .vscode
 
 # Byte-compiled / optimized / DLL files

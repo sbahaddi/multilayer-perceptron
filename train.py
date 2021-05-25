@@ -1,9 +1,10 @@
 import numpy as np
 import config as cfg
 import argparse
+import os
 from data_processing import Data
 from mlp import Model
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 np.random.seed(cfg.seed)
 
@@ -69,8 +70,9 @@ def confusion_matrix(val_pred, val, val_raw):
             f"\tTP = {true_positives}, FP = {false_positive}, TN = {true_negative}, FN = {false_negative}")
 
 
-def plot_logs(train_log, val_log, train_cost_log, val_cost_log):
-    plt.subplot(211)
+def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
+    plt.figure(figsize=(10, 7.5))
+    plt.subplot(212)
     plt.title("Accuracy")
     plt.ylabel("%")
     plt.plot(train_log, label='Train')
@@ -78,8 +80,8 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log):
     plt.legend()
     plt.grid()
 
-    plt.subplot(223)
-    plt.title("Loss")
+    plt.subplot(221)
+    plt.title("Train Loss")
     plt.ylabel("cross-entropy")
     plt.xlabel("epochs")
     plt.plot(range(len(train_cost_log)),
@@ -87,8 +89,8 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log):
     plt.legend()
     plt.grid()
 
-    plt.subplot(224)
-    plt.title("Loss")
+    plt.subplot(222)
+    plt.title("Val Loss")
     plt.ylabel("cross-entropy")
     plt.xlabel("epochs")
     plt.plot(range(len(val_cost_log)), val_cost_log,
@@ -96,7 +98,13 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log):
     plt.legend()
     plt.grid()
 
-    plt.show()
+    plt.tight_layout()
+    if not os.path.exists("training_plots/"):
+        os.mkdir("training_plots/")
+    plt.savefig("training_plots/learning_curve_graph.png")
+
+    if args.plot:
+        plt.show()
 
 
 if __name__ == "__main__":
@@ -109,7 +117,7 @@ if __name__ == "__main__":
                         help="save model to file", default="model.mlp")
     args = parser.parse_args()
 
-    data = Data(cfg.dataset_path)
+    data = Data(cfg.train_data)
     data.init_data()
     network = (data.X_train.shape[1],) + cfg.layers
     model = Model(network)
@@ -126,5 +134,4 @@ if __name__ == "__main__":
         confusion_matrix(model.predict(data.X_val), data.y_val,
                          model.forward(data.X_val)[-1])
 
-    if args.plot:
-        plot_logs(train_log, val_log, train_cost_log, val_cost_log)
+    plot_logs(train_log, val_log, train_cost_log, val_cost_log, args)

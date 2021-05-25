@@ -1,5 +1,6 @@
 split_val = 80
-dataset_path = "datasets/data.csv"
+train_data = "evaluation/data_training.csv"
+test_data = "evaluation/data_test.csv"
 categories = ["M", "B"]
 batch_size = 1
 epochs = 100
