@@ -45,7 +45,7 @@ def splitList(content, cut):
     return (content[:c], content[c:])
 
 
-def splitDataset(path, cut=0.2, label=False, shuffle=False):
+def splitDataset(path, cut=0.1, label=False, shuffle=True):
     ''' loads the dataset and splits it in two sets.
         arguments :
             `path` : (string)

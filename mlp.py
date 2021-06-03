@@ -49,13 +49,15 @@ class Model:
             val_cost = []
             for X_batch, y_batch in self.get_minibatches(X_train, y_train, batch_size):
                 train_cost.append(self.train_batch(X_batch, y_batch, lr))
-                val_cost.append(self.compute_loss(X_val, y_val))
+
+            # val_cost.append(self.compute_loss(X_val, y_val))
 
             train_log.append(self.score(self.predict(X_train), y_train))
             val_log.append(self.score(self.predict(X_val), y_val))
 
             train_cost_log.append(np.mean(train_cost))
-            val_cost_log.append(np.mean(val_cost))
+            val_cost_log.append(self.compute_loss(X_val, y_val))
+            # val_cost_log.append(np.mean(val_cost))
 
             lr_log.append(lr)
 
