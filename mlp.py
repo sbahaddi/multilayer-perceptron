@@ -3,7 +3,8 @@ import config as cfg
 import pickle as pk
 from dense import Dense
 from activation import ReLU, Softmax
-from os import path, mkdir
+from os import confstr, path, mkdir
+import copy
 
 
 class Model:
@@ -16,18 +17,45 @@ class Model:
         self.train_log = None
         self.val_log = None
         self.lr_log = None
+        self.early_stoping = False
+        self.stop_trigger = 0
+        self.min_cost_index = None
+        self.best_network = None
+        try:
+            self.stopping_epochs = cfg.stopping_epochs
+            self.early_stoping = cfg.early_stoping
+        except:
+            print("error while reading from config.py file")
 
     @staticmethod
     def __create_network(layers):
         network = []
         n_layers = len(layers) - 1
         for i in range(n_layers):
-            network.append(Dense(*layers[i:i+2]))
+            network.append(Dense(*layers[i : i + 2]))
             if i + 1 < n_layers:
                 network.append(ReLU())
             else:
                 network.append(Softmax())
         return network
+
+    def early_stopping(self, epoch):
+        if epoch == 0:
+            self.min_cost_index = epoch
+            self.stop_trigger = 0
+            self.best_network = copy.deepcopy(self.network)
+        elif self.val_cost_log[self.min_cost_index] > self.val_cost_log[-1]:
+            self.min_cost_index = epoch
+            self.best_network = copy.deepcopy(self.network)
+            self.stop_trigger = 0
+        else:
+            self.stop_trigger += 1
+        if self.stop_trigger >= 30 or (
+            epoch == cfg.epochs and self.min_cost_index != epoch
+        ):
+            self.network = copy.deepcopy(self.best_network)
+            return 1
+        return 0
 
     def train(self, X_train, y_train, X_val, y_val):
         batch_size = cfg.batch_size
@@ -41,8 +69,10 @@ class Model:
         train_log = []
         val_log = []
         train_cost_log = []
-        val_cost_log = []
+        self.val_cost_log = []
         lr_log = []
+
+        self.early_stoping = True
 
         for ep in range(epochs):
             train_cost = []
@@ -56,21 +86,25 @@ class Model:
             val_log.append(self.score(self.predict(X_val), y_val))
 
             train_cost_log.append(np.mean(train_cost))
-            val_cost_log.append(self.compute_loss(X_val, y_val))
+            self.val_cost_log.append(self.compute_loss(X_val, y_val))
             # val_cost_log.append(np.mean(val_cost))
 
             lr_log.append(lr)
 
             print(
-                f"epoch {ep}/{epochs} - loss: {train_cost_log[-1]} - val_loss: {val_cost_log[-1]}")
+                f"epoch {ep+1}/{epochs} - loss: {train_cost_log[-1]} - val_loss: {self.val_cost_log[-1]}"
+            )
+
+            if self.early_stopping(ep):
+                break
 
         self.train_cost_log = train_cost_log
-        self.val_cost_log = val_cost_log
+        # self.val_cost_log = val_cost_log
         self.train_log = train_log
         self.val_log = val_log
         self.lr_log = lr_log
 
-        return train_cost_log, val_cost_log, train_log, val_log, lr_log
+        return train_cost_log, self.val_cost_log, train_log, val_log, lr_log
 
     def compute_loss(self, X, y):
         val_preds = self.forward(X)[-1]
@@ -81,7 +115,7 @@ class Model:
     def get_minibatches(X, y, batch_size):
         indices = np.random.permutation(len(y))
         for i in range(0, len(y) - batch_size + 1, batch_size):
-            selection = indices[i:i+batch_size]
+            selection = indices[i : i + batch_size]
             yield X[selection], y[selection]
 
     def train_batch(self, X, y, lr):
@@ -133,9 +167,9 @@ class Model:
     @staticmethod
     def generate_filename(name, n):
         if n:
-            extension = name.split('.')[-1]
-            name = ".".join(name.split('.')[:-1])
-            name = name + "(" + str(n) + ")."+extension
+            extension = name.split(".")[-1]
+            name = ".".join(name.split(".")[:-1])
+            name = name + "(" + str(n) + ")." + extension
         return name
 
     def scale_data(self, X):
@@ -158,7 +192,7 @@ class Model:
     @staticmethod
     def load(filename):
         try:
-            with open(filename, 'rb') as file:
+            with open(filename, "rb") as file:
                 network = pk.load(file)
         except Exception:
             print(f"File {filename} not found or corrupt.")

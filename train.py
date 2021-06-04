@@ -6,7 +6,10 @@ from data_processing import Data
 from mlp import Model
 import matplotlib.pyplot as plt
 
-np.random.seed(cfg.seed)
+try:
+    np.random.seed(cfg.seed)
+except:
+    pass
 
 
 def one_hot(data, n):
@@ -67,7 +70,8 @@ def confusion_matrix(val_pred, val, val_raw):
             f"\tAccuracy={accuracy:.3f} Precision={precision:.3f} Recall={recall:.3f} F1={F1:.3f} loss={loss:.3f}"
         )
         print(
-            f"\tTP = {true_positives}, FP = {false_positive}, TN = {true_negative}, FN = {false_negative}")
+            f"\tTP = {true_positives}, FP = {false_positive}, TN = {true_negative}, FN = {false_negative}"
+        )
 
 
 def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
@@ -75,8 +79,8 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
     plt.subplot(212)
     plt.title("Accuracy")
     plt.ylabel("%")
-    plt.plot(train_log, label='Train')
-    plt.plot(val_log, label='Validation')
+    plt.plot(train_log, label="Train")
+    plt.plot(val_log, label="Validation")
     plt.legend()
     plt.grid()
 
@@ -84,8 +88,7 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
     plt.title("Train Loss")
     plt.ylabel("cross-entropy")
     plt.xlabel("epochs")
-    plt.plot(range(len(train_cost_log)),
-             train_cost_log, 'tab:red', label='Train')
+    plt.plot(range(len(train_cost_log)), train_cost_log, "tab:red", label="Train")
     plt.legend()
     plt.grid()
 
@@ -93,8 +96,7 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
     plt.title("Val Loss")
     plt.ylabel("cross-entropy")
     plt.xlabel("epochs")
-    plt.plot(range(len(val_cost_log)), val_cost_log,
-             'tab:red', label='Validation')
+    plt.plot(range(len(val_cost_log)), val_cost_log, "tab:red", label="Validation")
     plt.legend()
     plt.grid()
 
@@ -109,12 +111,11 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cm", action="store_true",
-                        help="use a confusion matrix")
+    parser.add_argument("--cm", action="store_true", help="use a confusion matrix")
+    parser.add_argument("-p", "--plot", help="plot training logs", action="store_true")
     parser.add_argument(
-        "-p", "--plot", help="plot training logs", action='store_true')
-    parser.add_argument("-s", "--savemodel",
-                        help="save model to file", default="model.mlp")
+        "-s", "--savemodel", help="save model to file", default="model.mlp"
+    )
     args = parser.parse_args()
 
     data = Data(cfg.train_data)
@@ -126,12 +127,14 @@ if __name__ == "__main__":
     data.X_val = model.scale_data(data.X_val)
 
     train_cost_log, val_cost_log, train_log, val_log, lr_log = model.train(
-        data.X_train, data.y_train, data.X_val, data.y_val)
+        data.X_train, data.y_train, data.X_val, data.y_val
+    )
 
     model.save_to_file(name=args.savemodel)
 
     if args.cm:
-        confusion_matrix(model.predict(data.X_val), data.y_val,
-                         model.forward(data.X_val)[-1])
+        confusion_matrix(
+            model.predict(data.X_val), data.y_val, model.forward(data.X_val)[-1]
+        )
 
     plot_logs(train_log, val_log, train_cost_log, val_cost_log, args)
