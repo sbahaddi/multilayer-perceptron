@@ -1,23 +1,24 @@
 import numpy as np
 
-class ReLU():
+
+# Rectified Linear Unit
+class ReLU:
     def __init__(self):
         pass
 
     def __str__(self):
         return "ReLU"
 
-    def forward(self, input_):
-        return np.maximum(1e-3 * input_, input_)
+    def forward(self, inputs):
+        return np.maximum(0, inputs)
 
-    def backward(self, input_, grad_output=None, lr=None):
-        relu_grad = input_ > 0
-        relu_grad = np.array([[1 if l else 1e-3 for l in i]
-                             for i in relu_grad])
-        return grad_output * relu_grad
+    def backward(self, inputs, grad_output=None, lr=None):
+        # Compute gradient of loss w.r.t. ReLU input
+        relu_grad = inputs > 0
+        return grad_output*relu_grad
 
 
-class Softmax():
+class Softmax:
     def __init__(self):
         pass
 

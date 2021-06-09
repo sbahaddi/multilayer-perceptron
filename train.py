@@ -63,7 +63,7 @@ def confusion_matrix(val_pred, val, val_raw):
         else:
             F1 = 2 * (precision * recall) / (precision + recall)
 
-        loss = Model.softmax_crossentropy_logits(raw_preds, y)
+        loss = Model.binary_crossentropy_error(raw_preds, y)
         print()
         print(f"Label {label}")
         print(

@@ -1,4 +1,3 @@
-
 import config as cfg
 import numpy as np
 import argparse
@@ -50,14 +49,15 @@ def confusion_matrix(val_pred, val, val_raw):
         else:
             F1 = 2 * (precision * recall) / (precision + recall)
 
-        loss = Model.softmax_crossentropy_logits(raw_preds, y)
+        loss = Model.binary_crossentropy_error(raw_preds, y)
         print()
         print(f"Label {label}")
         print(
             f"\tAccuracy={accuracy:.3f} Precision={precision:.3f} Recall={recall:.3f} F1={F1:.3f} loss={loss:.3f}"
         )
         print(
-            f"\tTP = {true_positives}, FP = {false_positive}, TN = {true_negative}, FN = {false_negative}")
+            f"\tTP = {true_positives}, FP = {false_positive}, TN = {true_negative}, FN = {false_negative}"
+        )
 
 
 def one_hot(data, n):
@@ -70,7 +70,8 @@ def one_hot(data, n):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-m", "--model", help="load saved model", default="networks/model.mlp")
+        "-m", "--model", help="load saved model", default="networks/model.mlp"
+    )
     args = parser.parse_args()
 
     model = Model.load(args.model)

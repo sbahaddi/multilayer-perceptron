@@ -32,7 +32,7 @@ class Model:
         network = []
         n_layers = len(layers) - 1
         for i in range(n_layers):
-            network.append(Dense(*layers[i : i + 2]))
+            network.append(Dense(*layers[i: i + 2]))
             if i + 1 < n_layers:
                 network.append(ReLU())
             else:
@@ -64,7 +64,6 @@ class Model:
 
         for ep in range(epochs):
             train_cost = []
-            val_cost = []
             for X_batch, y_batch in self.get_minibatches(X_train, y_train, batch_size):
                 train_cost.append(self.train_batch(X_batch, y_batch, lr))
 
@@ -92,14 +91,14 @@ class Model:
 
     def compute_loss(self, X, y):
         val_preds = self.forward(X)[-1]
-        val_loss = self.softmax_crossentropy_logits(val_preds[:, 1], y[:, 1])
+        val_loss = self.binary_crossentropy_error(val_preds[:, 1], y[:, 1])
         return val_loss
 
     @staticmethod
     def get_minibatches(X, y, batch_size):
         indices = np.random.permutation(len(y))
         for i in range(0, len(y) - batch_size + 1, batch_size):
-            selection = indices[i : i + batch_size]
+            selection = indices[i: i + batch_size]
             yield X[selection], y[selection]
 
     def train_batch(self, X, y, lr):
@@ -107,7 +106,7 @@ class Model:
         inputs = [X] + activations
         logits = activations[-1]
 
-        loss = self.softmax_crossentropy_logits(logits[:, 1], y[:, 1])
+        loss = self.binary_crossentropy_error(logits[:, 1], y[:, 1])
 
         loss_grad = self.network[-1].grad(logits, y)
 
@@ -127,19 +126,11 @@ class Model:
         return activations
 
     @staticmethod
-    def softmax_crossentropy_logits(pred_logits, y):
-        if len(pred_logits.shape) == 1:
-            pred_logits = pred_logits.reshape((pred_logits.shape[0], 1))
-            y = y.reshape((y.shape[0], 1))
-        a = y * np.log(pred_logits + 1e-15)
-        b = (1 - y) * np.log(1 - pred_logits + 1e-15)
-        c = (a + b).sum(axis=1)
-        if -np.sum(c) / len(y) == np.NaN:
-            exit()
-
-        return -np.sum(c) / len(y)
+    def binary_crossentropy_error(pred_logits, y):
         # 1e-15 is used to never do log of 0 which is equal to inf
-        # return np.sum((-y * np.log(1e-15 + pred_logits)) - ((1 - y) * np.log(1e-15 + 1 - pred_logits))) / pred_logits.shape[1]
+        loss = np.sum((-y * np.log(1e-15 + pred_logits)) - ((1 - y)
+                      * np.log(1e-15 + (1 - pred_logits)))) / len(y)
+        return loss
 
     def score(self, y_pred, y_true):
         return np.mean(y_pred == y_true[:, 1])
