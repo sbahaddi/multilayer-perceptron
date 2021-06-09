@@ -19,7 +19,7 @@ class Model:
         self.lr_log = None
         self.early_stoping = False
         self.stop_trigger = 0
-        self.min_cost_index = None
+        self.min_cost_index = 0
         self.best_network = None
         try:
             self.stopping_epochs = cfg.stopping_epochs
@@ -40,19 +40,13 @@ class Model:
         return network
 
     def early_stopping(self, epoch):
-        if epoch == 0:
-            self.min_cost_index = epoch
-            self.stop_trigger = 0
-            self.best_network = copy.deepcopy(self.network)
-        elif self.val_cost_log[self.min_cost_index] > self.val_cost_log[-1]:
+        if self.val_cost_log[self.min_cost_index] > self.val_cost_log[-1]:
             self.min_cost_index = epoch
             self.best_network = copy.deepcopy(self.network)
             self.stop_trigger = 0
         else:
             self.stop_trigger += 1
-        if self.stop_trigger >= 30 or (
-            epoch == cfg.epochs and self.min_cost_index != epoch
-        ):
+        if self.stop_trigger >= 30:
             self.network = copy.deepcopy(self.best_network)
             return 1
         return 0
@@ -61,10 +55,6 @@ class Model:
         batch_size = cfg.batch_size
         epochs = cfg.epochs
         lr = cfg.learning_rate
-        dyn_lr = cfg.dynamic_learning_rate
-        lr_multiplier = cfg.learning_rate_multiplier
-        lr_n_changes = cfg.learning_rate_change_number
-        lr_epoch_change = epochs // lr_n_changes
 
         train_log = []
         val_log = []
@@ -72,22 +62,17 @@ class Model:
         self.val_cost_log = []
         lr_log = []
 
-        self.early_stoping = True
-
         for ep in range(epochs):
             train_cost = []
             val_cost = []
             for X_batch, y_batch in self.get_minibatches(X_train, y_train, batch_size):
                 train_cost.append(self.train_batch(X_batch, y_batch, lr))
 
-            # val_cost.append(self.compute_loss(X_val, y_val))
-
             train_log.append(self.score(self.predict(X_train), y_train))
             val_log.append(self.score(self.predict(X_val), y_val))
 
             train_cost_log.append(np.mean(train_cost))
             self.val_cost_log.append(self.compute_loss(X_val, y_val))
-            # val_cost_log.append(np.mean(val_cost))
 
             lr_log.append(lr)
 
@@ -95,11 +80,10 @@ class Model:
                 f"epoch {ep+1}/{epochs} - loss: {train_cost_log[-1]} - val_loss: {self.val_cost_log[-1]}"
             )
 
-            if self.early_stopping(ep):
+            if self.early_stoping and self.early_stopping(ep):
                 break
 
         self.train_cost_log = train_cost_log
-        # self.val_cost_log = val_cost_log
         self.train_log = train_log
         self.val_log = val_log
         self.lr_log = lr_log
