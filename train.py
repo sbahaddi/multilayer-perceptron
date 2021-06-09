@@ -103,7 +103,7 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
     plt.tight_layout()
     if not os.path.exists("training_plots/"):
         os.mkdir("training_plots/")
-    plt.savefig("training_plots/learning_curve_graph.png")
+    plt.savefig(f"training_plots/{args.savemodel}.png")
 
     if args.plot:
         plt.show()
