@@ -7,6 +7,17 @@ class Dense():
         A dense layer is a layer which performs a learned affine transformation:
         f(x) = <W*x> + b
         """
+
+        """
+        Both W and b are initialized during layer creation and 
+        updated each time backward is called. 
+        Note that we are using Xavier initialization which is a trick 
+        to train our model to converge faster.
+        Instead of initializing our weights with small numbers 
+        which are distributed randomly we initialize our weights with 
+        mean zero and variance of 2/(number of inputs + number of outputs)
+        """
+
         self.weights = np.random.normal(loc=0.0,
                                         scale=np.sqrt(
                                             2/(input_units+output_units)),
