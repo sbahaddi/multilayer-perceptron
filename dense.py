@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Dense():
     def __init__(self, input_units, output_units):
         """
@@ -32,7 +33,7 @@ class Dense():
 
         # compute gradient w.r.t. weights and biases
         grad_weights = np.dot(input.T, grad_output)
-        grad_biases = grad_output.mean(axis=0)*input.shape[0]
+        grad_biases = grad_output.sum(axis=0)
 
         assert grad_weights.shape == self.weights.shape and grad_biases.shape == self.biases.shape
 

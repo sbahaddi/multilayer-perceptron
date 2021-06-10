@@ -88,7 +88,8 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
     plt.title("Train Loss")
     plt.ylabel("cross-entropy")
     plt.xlabel("epochs")
-    plt.plot(range(len(train_cost_log)), train_cost_log, "tab:red", label="Train")
+    plt.plot(range(len(train_cost_log)),
+             train_cost_log, "tab:red", label="Train")
     plt.legend()
     plt.grid()
 
@@ -96,7 +97,8 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
     plt.title("Val Loss")
     plt.ylabel("cross-entropy")
     plt.xlabel("epochs")
-    plt.plot(range(len(val_cost_log)), val_cost_log, "tab:red", label="Validation")
+    plt.plot(range(len(val_cost_log)), val_cost_log,
+             "tab:red", label="Validation")
     plt.legend()
     plt.grid()
 
@@ -111,8 +113,10 @@ def plot_logs(train_log, val_log, train_cost_log, val_cost_log, args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cm", action="store_true", help="use a confusion matrix")
-    parser.add_argument("-p", "--plot", help="plot training logs", action="store_true")
+    parser.add_argument("--cm", action="store_true",
+                        help="use a confusion matrix")
+    parser.add_argument(
+        "-p", "--plot", help="plot training logs", action="store_true")
     parser.add_argument(
         "-s", "--savemodel", help="save model to file", default="model.mlp"
     )
@@ -120,6 +124,7 @@ if __name__ == "__main__":
 
     data = Data(cfg.train_data)
     data.init_data()
+    assert cfg.layers[-1] == 2, "output layer must have 2 neurons"
     network = (data.X_train.shape[1],) + cfg.layers
     model = Model(network)
 
@@ -134,7 +139,8 @@ if __name__ == "__main__":
 
     if args.cm:
         confusion_matrix(
-            model.predict(data.X_val), data.y_val, model.forward(data.X_val)[-1]
+            model.predict(data.X_val), data.y_val, model.forward(
+                data.X_val)[-1]
         )
 
     plot_logs(train_log, val_log, train_cost_log, val_cost_log, args)
